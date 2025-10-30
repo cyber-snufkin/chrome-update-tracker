@@ -1,0 +1,176 @@
+# 🧭 Chrome 133 更新チェック（Stable＋コードサンプル付き）
+
+- リリース日: 2025-02-04（Stable）
+- 一次情報:
+  - Release Notes: https://developer.chrome.com/release-notes/133?hl=ja
+  - New in Chrome 133: https://developer.chrome.com/blog/new-in-chrome-133?hl=ja
+  - New in DevTools 133: https://developer.chrome.com/blog/new-in-devtools-133?hl=ja
+  - New in WebGPU 133: https://developer.chrome.com/blog/new-in-webgpu-133?hl=ja
+  - ChromeStatus Roadmap: https://chromestatus.com/roadmap
+  - MDN / Can I use: https://developer.mozilla.org/ja/docs/Web / https://caniuse.com/
+  - Baseline: https://web.dev/baseline?hl=ja
+
+---
+
+## 🔹 全体サマリ
+- CSSの強化（`attr()` 拡張、スクロール状態コンテナクエリ、`text-box-*`）
+- Popover APIの実用改善（`popover="hint"`、`showPopover({ source })`）
+- Web APIの拡張（`Animation.overallProgress`、`FileSystemObserver`、`Node.prototype.moveBefore`、`Atomics.pause()` など）
+- DevTools：AIチャット履歴の永続化、Performance可視化の改善
+- WebGPU：要求limitの柔軟化、WGSL整合性向上、新しい頂点フォーマット ほか
+
+### 🚨 重要度の高いもの
+- CSS `attr()` の任意プロパティ＆型付き対応
+- スクロール状態コンテナクエリ（`container-type: scroll-state`）
+- `text-box-trim` / `text-box-edge` による縦メトリクス基準の揃え
+- `Node.prototype.moveBefore`（状態維持のDOM移動）
+- `FileSystemObserver`（ローカル/OPFS監視）
+- `Animation.overallProgress`（反復含む正規化進捗）
+- `Atomics.pause()`（スピン待ちヒント）
+- Popover `popover="hint"` と `showPopover({ source })`
+
+---
+
+## 🧩 HTML
+
+### Popover: `hint` 値 & `showPopover({ source })`
+```html
+<button id="btn">Open</button>
+<div id="card" popover>内容</div>
+
+<button aria-describedby="tip">?
+  <span id="tip" popover="hint" role="tooltip">ヘルプ</span>
+</button>
+
+<script>
+  btn.addEventListener('click', () => {
+    card.showPopover({ source: btn }); // アンカー/インボーカーを明示
+  });
+</script>
+```
+
+---
+
+## 🎨 CSS
+
+### 1) 型付き `attr()`（任意プロパティで使用可）
+```html
+<div data-accent="#0ea5e9" data-gap="12"></div>
+<style>
+  div {
+    --accent: attr(data-accent color, #22c55e);
+    --gap: attr(data-gap length, 8px);
+    outline: 2px solid var(--accent);
+    gap: var(--gap);
+  }
+</style>
+```
+
+### 2) スクロール状態コンテナクエリ
+```html
+<section class="scroller">
+  <header class="sticky">見出し</header>
+  <article>…</article>
+</section>
+
+<style>
+  .scroller { overflow: auto; container-type: scroll-state; }
+
+  @container scroll-state(stuck) {
+    .sticky { box-shadow: 0 2px 10px rgba(0,0,0,.15); }
+  }
+  @container scroll-state(snapped) {
+    .sticky { color: oklch(0.65 0.1 230); }
+  }
+</style>
+```
+
+### 3) `text-box-trim` / `text-box-edge`
+```html
+<h1 class="title">縦の余白をメトリクス基準で整える</h1>
+<style>
+  .title {
+    text-box-trim: both;        /* block-start/end のはみ出しをトリム */
+    text-box-edge: cap alphabetic;
+  }
+</style>
+```
+
+---
+
+## ⚙️ JavaScript (V8/言語周辺)
+
+### `Atomics.pause()`（スピン待ちヒント）
+```js
+// SharedArrayBuffer を用いた簡易待機
+while (Atomics.load(flag, 0) === 0) {
+  Atomics.pause(); // ビジーループに休止ヒント → 省電力/発熱低減期待
+}
+```
+
+---
+
+## 🧠 AI in Chrome（DevTools統合）
+- DevToolsのAIパネルでチャット履歴がセッションを跨いで保持され、調査継続が容易に。
+
+---
+
+## 🧰 DevTools
+- Performanceタブ：画像配信インサイト、JSコールのスタック表示、無関係スクリプトの無視など可視化強化
+- “What’s new” パネルやキーボードナビゲーションの改善などUX強化
+
+---
+
+## 🌐 Web API（その他）
+
+### 1) `Animation.overallProgress`
+```js
+const anim = document.querySelector('.box').animate(
+  [{ transform: 'translateX(0)' }, { transform: 'translateX(200px)' }],
+  { duration: 1000, iterations: 3 }
+);
+
+requestAnimationFrame(function tick() {
+  console.log(anim.overallProgress); // 0..1（総反復を含む正規化進捗）
+  if (anim.playState !== 'finished') requestAnimationFrame(tick);
+});
+```
+
+### 2) `FileSystemObserver`
+```js
+// directoryHandle は File System Access API で取得済みの想定
+const obs = new FileSystemObserver(changes => {
+  for (const c of changes) console.log(c.kind, c.entry?.name); // created/modified/deleted
+});
+await obs.observe(directoryHandle, { recursive: true });
+```
+
+### 3) `Node.prototype.moveBefore`（状態維持のDOM移動）
+```html
+<div id="from"><video id="v" controls src="movie.mp4"></video></div>
+<div id="to"></div>
+<script>
+  to.moveBefore(v, null); // 再生状態・フォーカス等を維持したまま移動
+</script>
+```
+
+---
+
+## 🧾 その他（WebGPU）
+```js
+const adapter = await navigator.gpu.requestAdapter();
+const device = await adapter.requestDevice({
+  requiredLimits: {
+    maxStorageTexturesPerShaderStage: adapter.limits.maxStorageTexturesPerShaderStage,
+    someFutureLimit: undefined // 未定義limitを undefined 許容 → 仕様進化に強く
+  }
+});
+```
+
+---
+
+### 補足（導入指針）
+- 状態に応じたUI分岐は JS から CSS へ段階移行（`:open` / コンテナクエリ活用）
+- DOM再配置が絡むUIは `moveBefore` で再初期化バグの回避
+- 同期/エディタ系は `FileSystemObserver` で差分監視
+- WebGPUは将来互換を意識した初期化に寄せる
