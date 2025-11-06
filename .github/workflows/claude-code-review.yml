@@ -40,18 +40,49 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
-            Please review this pull request and provide feedback on:
-            - Code quality and best practices
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
-            - Test coverage
+            このPRを日本語でレビューしてください。
 
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+            ## レビュー観点
 
-            Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
+            ### 1. ドキュメントの真実性評価
+            以下の一次情報源と照らし合わせて、記載内容の正確性を検証してください：
+            - ChromeStatus Roadmap: https://chromestatus.com/roadmap
+            - Chrome 新機能情報: https://developer.chrome.com/new?hl=ja
+            - Baseline: https://web.dev/baseline?hl=ja
+            - MDN Web Docs: https://developer.mozilla.org/ja/docs/Web
+            - Can I use: https://caniuse.com/
+
+            ### 2. 内容の整合性評価
+            - ドキュメント内での記述の一貫性
+            - 全体サマリと詳細セクションの整合性
+            - Glossary の用語が本文に実際に登場しているか
+            - バージョン間での記述の整合性
+
+            ### 3. 新用語のピックアップ基準
+            - エンジニア歴3年程度の知識レベルを基準とする
+            - 一般的なWeb開発者が知らない可能性がある用語を優先
+            - 既に広く知られている基本的な用語（HTML, CSS, JavaScript など）は除外
+
+            ### 4. コードサンプルの検証
+            - 提示されているコードサンプルが実際に動作するか
+            - 構文エラーがないか
+            - 実用的なユースケースを示しているか
+            - コメントや説明が適切か
+
+            ### 5. その他
+            - CLAUDE.md の規約に従っているか
+            - ファイル命名規則の遵守
+            - マークダウン記法の正確性
+
+            ## レビュー結果の提示方法
+            - 建設的かつ具体的なフィードバックを提供
+            - 重大な問題は明確に指摘
+            - 改善提案は実行可能な形で提示
+            - 良い点も積極的に評価
+
+            レビュー完了後、`gh pr comment` コマンドで PR にコメントを投稿してください。
 
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
-          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),WebFetch"'
 
