@@ -1,0 +1,37 @@
+{
+  "name": "Chrome Update Tracker - Markdown Documentation",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    },
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "DavidAnson.vscode-markdownlint",
+        "yzhang.markdown-all-in-one",
+        "bierner.markdown-preview-github-styles"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
+        "[markdown]": {
+          "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+        }
+      }
+    },
+    "jetbrains": {
+      "backend": "IntelliJ IDEA Community"
+    }
+  },
+
+  "postCreateCommand": "npm install -g markdownlint-cli",
+
+  "remoteEnv": {
+    "LANG": "ja_JP.UTF-8"
+  }
+}
