@@ -44,14 +44,35 @@ Chrome ブラウザの更新情報を詳細な日本語ドキュメントで追�
 
 #### Claude Code との併用
 
-Dev Container 内でも Claude Code を使用できます：
+Dev Container には Claude Code が自動的にインストールされます。
+
+**コンテナ内で Claude Code を使用：**
 
 ```bash
 # コンテナ内で Claude Code を起動
 claude
 ```
 
-**注意**: Claude Code は VS Code の Dev Container 内で動作しますが、JetBrains IDE の Dev Container では制限がある場合があります。その場合は、ホスト側で Claude Code を起動してください。
+**設定された MCP サーバー：**
+- `sequential-thinking`: 複雑な問題解決のための段階的思考
+- `context7`: 最新のライブラリドキュメントへのアクセス
+
+**永続化されるデータ：**
+- Claude Code の設定 (`~/.claude`)
+- Claude Code のバイナリ (`~/.local`)
+- Bash の履歴
+
+これにより、コンテナを再ビルドしても設定や履歴が保持されます。
+
+**初回セットアップ後の確認：**
+
+```bash
+# Claude Code がインストールされているか確認
+claude --version
+
+# MCP サーバーの設定を確認
+cat ~/.claude/claude_desktop_config.json
+```
 
 ### Markdown Lint の実行
 

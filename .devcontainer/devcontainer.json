@@ -9,6 +9,12 @@
     "ghcr.io/devcontainers/features/git:1": {}
   },
 
+  "mounts": [
+    "source=claude-code-config,target=/home/vscode/.claude,type=volume",
+    "source=claude-code-bin,target=/home/vscode/.local,type=volume",
+    "source=bash-history,target=/home/vscode/.bash_history_persist,type=volume"
+  ],
+
   "customizations": {
     "vscode": {
       "extensions": [
@@ -29,9 +35,14 @@
     }
   },
 
-  "postCreateCommand": "npm install -g markdownlint-cli",
+  "postCreateCommand": "bash -c 'npm install -g markdownlint-cli && .devcontainer/install-claude.sh && .devcontainer/setup-claude-config.sh'",
+
+  "postStartCommand": "if [ -f /home/vscode/.bash_history_persist/bash_history ]; then cp /home/vscode/.bash_history_persist/bash_history /home/vscode/.bash_history; fi",
+
+  "postAttachCommand": "echo 'HISTFILE=/home/vscode/.bash_history_persist/bash_history' >> /home/vscode/.bashrc",
 
   "remoteEnv": {
-    "LANG": "ja_JP.UTF-8"
+    "LANG": "ja_JP.UTF-8",
+    "PATH": "/home/vscode/.local/bin:${containerEnv:PATH}"
   }
 }
