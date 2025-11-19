@@ -3,8 +3,36 @@ set -e
 
 echo "Installing Claude Code..."
 
-# Install Claude Code CLI
-curl -fsSL https://cli.anthropic.com/install.sh | bash
+# Create installation directory
+mkdir -p ~/.claude/local
+cd ~/.claude/local
+
+# Create package.json
+cat > package.json <<EOF
+{
+  "name": "claude-local",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "@anthropic-ai/claude-code": "^2.0.46"
+  }
+}
+EOF
+
+# Install Claude Code
+npm install
+
+# Create wrapper script
+cat > claude <<'EOF'
+#!/bin/bash
+exec node ~/.claude/local/node_modules/@anthropic-ai/claude-code/bin/cli.js "$@"
+EOF
+
+chmod +x claude
+
+# Create bin directory and symlink
+mkdir -p ~/.local/bin
+ln -sf ~/.claude/local/claude ~/.local/bin/claude
 
 # Add Claude to PATH for the current session
 export PATH="$HOME/.local/bin:$PATH"
@@ -15,7 +43,8 @@ if ! grep -q '.local/bin' ~/.bashrc; then
 fi
 
 if ! grep -q '.local/bin' ~/.zshrc 2>/dev/null; then
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc 2>/dev/null || true
 fi
 
 echo "Claude Code installation completed!"
+echo "You can now run 'claude' to start Claude Code"
