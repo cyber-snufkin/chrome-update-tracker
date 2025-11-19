@@ -25,7 +25,7 @@ npm install
 # Create wrapper script
 cat > claude <<'EOF'
 #!/bin/bash
-exec node ~/.claude/local/node_modules/@anthropic-ai/claude-code/bin/cli.js "$@"
+exec node ~/.claude/local/node_modules/@anthropic-ai/claude-code/cli.js "$@"
 EOF
 
 chmod +x claude
